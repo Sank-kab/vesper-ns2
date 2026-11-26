@@ -159,6 +159,10 @@ function renderServerState(s) {
   const nsRunning = s.ns2jb.status === 'starting' || s.ns2jb.status === 'ready' || s.ns2jb.status === 'stopping';
   $('btn-start-ns2jb').disabled = nsRunning;
   $('btn-stop-ns2jb').disabled = !nsRunning;
+  if (nsRunning && s.ns2jb.vector && $('exploit-vector').value !== s.ns2jb.vector) {
+    $('exploit-vector').value = s.ns2jb.vector;
+    updateCiv7Warning();
+  }
   $('exploit-vector').disabled = nsRunning;
   $('ns2jb-stdin-row').classList.toggle('hidden', !nsRunning);
 

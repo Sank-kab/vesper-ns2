@@ -97,7 +97,8 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === '/api/config/test-wsl' && req.method === 'POST') {
       const body = await readBody(req);
-      const cfg = body && body.ns2jbDir ? body : loadConfig();
+      const hasBody = body && Object.keys(body).length > 0;
+      const cfg = hasBody ? {...loadConfig(), ...body} : loadConfig();
       const result = await bridge.testConnection(cfg);
       return sendJson(res, 200, result);
     }
