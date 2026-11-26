@@ -39,6 +39,8 @@ function t(key, vars = {}) {
 function updateCiv7Warning() {
   const isCiv = $('exploit-vector').value === 'civ7';
   $('civ7-warn-box').classList.toggle('hidden', !isCiv);
+  $('ip-pc-row').classList.toggle('hidden', isCiv);
+  $('ip-console-row').classList.toggle('hidden', !isCiv);
 }
 
 function applyLanguage() {
@@ -164,6 +166,7 @@ function renderServerState(s) {
     updateCiv7Warning();
   }
   $('exploit-vector').disabled = nsRunning;
+  $('civ7-console-ip').disabled = nsRunning;
   $('ns2jb-stdin-row').classList.toggle('hidden', !nsRunning);
 
   const nsPill = $('pill-ns2jb');
@@ -429,13 +432,17 @@ $('btn-clear-log').addEventListener('click', () => {
 
 $('btn-start-ns2jb').addEventListener('click', async () => {
   try {
+    const vector = $('exploit-vector').value;
+    const isCiv = vector === 'civ7';
+    const ip = isCiv ? $('civ7-console-ip').value.trim() : $('ns2jb-ip').value;
+    if (isCiv && ip) localStorage.setItem('ns2_gl_civ7_ip', ip);
     state.activeLog = 'ns2jb';
     document.querySelectorAll('.log-tab').forEach(b => b.classList.toggle('active', b.dataset.log === 'ns2jb'));
     state.logs.ns2jb = [];
     renderLaunchLog();
     await api('/api/ns2jb/start', {
       method: 'POST',
-      body: JSON.stringify({ip: $('ns2jb-ip').value, vector: $('exploit-vector').value})
+      body: JSON.stringify({ip, vector})
     });
     showToast(t('toastNs2jbStarted'));
   } catch (e) { showToast(e.message, true); }
@@ -574,7 +581,7 @@ function renderEnvChecklist(r) {
     {title: 'WSL', sub: r.distro, cls: 'ok', tag: 'OK'},
     {title: 'Node.js (WSL)', sub: r.node, cls: r.nodeOk ? 'ok' : 'err', tag: r.nodeOk ? 'OK' : '22+ req'},
     {title: 'ns2jb (SmileBASIC)', sub: r.ns2jb ? 'run.cjs found' : 'Not installed', cls: r.ns2jb ? 'ok' : 'err', tag: r.ns2jb ? 'OK' : 'Missing'},
-    {title: 'Civ VII (Untested)', sub: r.civ7 ? 'CivSwitchFS found' : 'Optional / Untested', cls: r.civ7 ? 'ok' : 'warn', tag: r.civ7 ? 'Found' : 'Optional'},
+    {title: 'Civ VII (Untested)', sub: r.civ7 ? 'civ7-fs ready' : 'Optional / Untested', cls: r.civ7 ? 'ok' : 'warn', tag: r.civ7 ? 'Found' : 'Optional'},
     {title: 'Backend Engine', sub: r.bundledBackend ? 'Bundled (ready)' : 'Custom path', cls: r.backend ? 'ok' : 'err', tag: r.backend ? 'OK' : 'Missing'},
     {title: 'Python + nup', sub: r.nup ? r.python : 'Optional (.nup only)', cls: r.nup ? 'ok' : 'warn', tag: r.nup ? 'OK' : 'Optional'}
   ];
@@ -692,5 +699,7 @@ $('btn-shutdown-server').addEventListener('click', async () => {
   } catch (e) { showToast(e.message, true); }
 });
 
+const savedCiv7Ip = localStorage.getItem('ns2_gl_civ7_ip');
+if (savedCiv7Ip) $('civ7-console-ip').value = savedCiv7Ip;
 applyLanguage();
 refreshAll().then(() => runEnvCheck().catch(() => {}));

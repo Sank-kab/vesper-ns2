@@ -106,11 +106,16 @@
 
             <div class="warn-box hidden" id="civ7-warn-box" data-i18n-html="civ7UntestedWarn"></div>
 
-            <div class="form-row">
+            <div class="form-row" id="ip-pc-row">
               <label for="ns2jb-ip" data-i18n="ipLabel">Local network IP address (optional)</label>
               <select id="ns2jb-ip">
                 <option value="">Automatic</option>
               </select>
+            </div>
+
+            <div class="form-row hidden" id="ip-console-row">
+              <label for="civ7-console-ip" data-i18n="consoleIpLabel">Switch 2 console IP address (CivSwitch :9026)</label>
+              <input type="text" id="civ7-console-ip" data-i18n-placeholder="consoleIpPlaceholder" placeholder="e.g. 192.168.1.50" />
             </div>
 
             <div class="btn-group">
@@ -357,7 +362,7 @@
             </div>
             <div class="form-row">
               <label for="cfg-civ7-cmd" data-i18n="cfgCiv7CmdLabel">Civ VII RPC command [UNTESTED]</label>
-              <input type="text" id="cfg-civ7-cmd" placeholder="node run.cjs --rpc" />
+              <input type="text" id="cfg-civ7-cmd" placeholder="node engine/run.cjs" />
             </div>
             <div class="form-row">
               <label for="cfg-backend" data-i18n="cfgBackendLabel">Backend folder in WSL (blank = bundled engine)</label>

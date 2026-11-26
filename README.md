@@ -22,7 +22,7 @@ Transparency matters in beta software. Here is what has been verified on real Sw
 | **Multi-profile selector** (`games/<profile>/` with `exefs.nsp` + `romfs.bin` + `.ips32`) | **Tested & Working** | Verified switching between multiple full ExeFS/RomFS profiles on the same microSD |
 | **Large merged RomFS (`romfs.bin`) + ExeFS replacement + `.ips32` patching** | **Tested & Working** | Verified on a single target Title ID with multiple distinct profiles (both with and without the optional `MountTemporaryStorage` patch) |
 | **Empty secondary user profile** (no existing save data on target title) | **Tested & Working** | **Strongly recommended** (see Save Data section below) |
-| **Civilization VII (`CivSwitchFS`)** FS exploit vector | **UNTESTED** | Experimental option included in the UI; requires a compatible `CivSwitchFS` fork exposing an `ns2jb`-compatible FS 4/4 RPC session |
+| **Civilization VII (`civ7-fs`)** FS exploit vector | **UNTESTED** | Experimental option included in the UI (`HerXayah/civ7-fs`, `node engine/run.cjs <CONSOLE-IP>`) exposing an `ns2jb`-compatible FS 4/4 RPC session |
 | **Multiple target Title IDs simultaneously** | **UNTESTED on hardware** | Multi-target selection is implemented and unit-tested offline, but only one target Title ID has been tested on real hardware so far |
 | **User profiles that ALREADY have save data on the target title** | **UNTESTED / NOT RECOMMENDED** | High risk of save conflicts or overwriting existing save data |
 | **Extended / late-game runtime stability** | **UNTESTED** | Only initial boot, menus, and early runtime have been verified |
@@ -41,9 +41,9 @@ Transparency matters in beta software. Here is what has been verified on real Sw
 - When building a profile from a `.nup` package, Vesper can optionally check whether `main` imports `_ZN2nn2fs21MountTemporaryStorageEPKc` and generate a minimal **23-byte `.ips32` patch** for `sdk` (`mov w0, #0; ret`) so the mount check returns `ResultSuccess`.
 - **Possible consequences & limitations:** Because `TemporaryStorage` is **not actually mounted**, any later runtime code that tries to create, read, or write files under `tmp:/` (such as temporary caches, replays, screenshots, or specific transitions) may fail with `ResultNotMounted` (`2002-6002`), misbehave, or crash later. You can disable this auto-patch at any time in the UI or via `--no-auto-patch`.
 
-### 3. Civilization VII (`CivSwitchFS`) Vector — Experimental / Untested
-- Alongside **SmileBASIC 4 (`ns2jb`)**, the UI includes an experimental vector option and a **1-Click Install CivSwitchFS** section in **Setup Guide** (clones `ItsNerisma/CivSwitchFS` into `~/civ7-fs` and runs `npm install`).
-- **This vector has NOT been tested by the author.** Note that upstream `ItsNerisma/CivSwitchFS` is semi-untethered (PC RPC was removed; it installs via `npm run persist -- <console-ip>` and documents save/brick risks in its own `BRICK_RISKS.md`). Automatic Step 2 detection in Vesper requires a `CivSwitchFS` fork exposing an `ns2jb`-compatible FS 4/4 RPC session (`result.json`, `connection.json`, `switch2/fs-execution-current.json`). Its WSL directory and command can be configured in **Settings**.
+### 3. Civilization VII (`civ7-fs`) Vector — Experimental / Untested
+- Alongside **SmileBASIC 4 (`ns2jb`)**, the UI includes an experimental vector option and a **1-Click Install civ7-fs** section in **Setup Guide** (clones [`HerXayah/civ7-fs`](https://github.com/HerXayah/civ7-fs) into `~/civ7-fs`, no `npm install` needed).
+- **This vector has NOT been tested by the author.** It runs `node engine/run.cjs <CONSOLE-IP>` against a Switch 2 running Gezine's CivSwitch Remote JS Loader (`:9026`) and exposes the same FS 4/4 RPC session layout (`result.json`, `connection.json`, `switch2/pipeline.cjs`). Its WSL directory and command can be configured in **Settings**.
 
 ---
 
@@ -149,7 +149,7 @@ Yes — you can register any legally owned target title's `main.npdm` in **Micro
 
 - Huge thanks to **[SebaaMG](https://github.com/SebaaMG/ns2jb-modloader)** and the **`ns2jb-modloader`** project — the bundled multi-profile backend in `engine/` is built directly on top of `ns2jb-modloader` (GPL-2.0-only).
 - Thanks to **[Kurumuz](https://gitlab.com/kurumuz/ns2jb)** and contributors for **`ns2jb`**.
-- Thanks to **[ItsNerisma](https://github.com/ItsNerisma/CivSwitchFS)** and **[Gezine](https://github.com/Gezine)** for **`CivSwitchFS`**.
+- Thanks to **[HerXayah](https://github.com/HerXayah/civ7-fs)** and **[Gezine](https://github.com/Gezine)** for **`civ7-fs`** / **CivSwitch**.
 - Thanks to the Switch 2 research & homebrew community (`libounce`, `libnx`, `zstd`, and all third-party licenses preserved under `engine/licenses/`).
 
 ## License
