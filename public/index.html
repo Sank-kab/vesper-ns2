@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vesper — Switch 2</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <span class="jc left"></span>
+          <span class="jc right"></span>
+        </div>
+        <div>
+          <h1>Vesper</h1>
+          <p class="subtitle" data-i18n="subtitle">Switch 2 ExeFS / RomFS Frontend</p>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-btn active" data-tab="launch">
+          <span class="nav-icon">▶</span>
+          <span data-i18n="navLaunch">Launch Game</span>
+        </button>
+        <button class="nav-btn" data-tab="prepare">
+          <span class="nav-icon">＋</span>
+          <span data-i18n="navPrepare">Prepare Game (.nup)</span>
+        </button>
+        <button class="nav-btn" data-tab="sd">
+          <span class="nav-icon">▤</span>
+          <span data-i18n="navSd">MicroSD &amp; Hosts</span>
+        </button>
+        <button class="nav-btn" data-tab="setup">
+          <span class="nav-icon">★</span>
+          <span data-i18n="navSetup">Setup Guide</span>
+        </button>
+        <button class="nav-btn" data-tab="settings">
+          <span class="nav-icon">⚙</span>
+          <span data-i18n="navSettings">Settings</span>
+        </button>
+      </nav>
+
+      <div class="lang-box">
+        <label for="lang-select" data-i18n="langLabel">Language</label>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="it">Italiano</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="ja">日本語</option>
+        </select>
+      </div>
+
+      <div class="sidebar-status">
+        <div class="status-row">
+          <span class="dot" id="dot-ns2jb"></span>
+          <div>
+            <div class="status-label" data-i18n="statusNs2jb">ns2jb RPC</div>
+            <div class="status-value" id="sidebar-ns2jb">Idle</div>
+          </div>
+        </div>
+        <div class="status-row">
+          <span class="dot" id="dot-sd"></span>
+          <div>
+            <div class="status-label" data-i18n="statusSd">PC MicroSD</div>
+            <div class="status-value" id="sidebar-sd">...</div>
+          </div>
+        </div>
+        <button class="btn danger small-btn quit-btn" id="btn-shutdown-server" data-i18n="btnQuitServer">Quit Server</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- TAB 1: LAUNCH -->
+      <section class="tab-panel active" id="tab-launch">
+        <header class="page-header">
+          <div>
+            <h2 data-i18n="launchTitle">Launch a Game on Switch 2</h2>
+            <p class="muted" data-i18n="launchDesc">Follow the 3 steps in order — no manual terminal commands needed.</p>
+          </div>
+          <button class="btn ghost" id="btn-refresh-launch" data-i18n="refreshBtn">Refresh</button>
+        </header>
+
+        <div class="steps-grid">
+          <div class="card step-card">
+            <div class="step-head">
+              <span class="step-badge cyan">1</span>
+              <div>
+                <h3 data-i18n="step1Title">Connect Switch 2 (ns2jb RPC)</h3>
+                <p class="muted small" data-i18n="step1Desc">Start the exploit in RPC mode and wait for SmileBASIC.</p>
+              </div>
+              <span class="pill" id="pill-ns2jb">Stopped</span>
+            </div>
+
+            <div class="form-row">
+              <label for="exploit-vector" data-i18n="vectorLabel">Exploit vector</label>
+              <select id="exploit-vector">
+                <option value="smilebasic" data-i18n="vectorSmileBasic">SmileBASIC 4 (ns2jb — Tested)</option>
+                <option value="civ7" data-i18n="vectorCiv7">Civilization VII (CivSwitchFS — UNTESTED)</option>
+              </select>
+            </div>
+
+            <div class="warn-box hidden" id="civ7-warn-box" data-i18n-html="civ7UntestedWarn"></div>
+
+            <div class="form-row">
+              <label for="ns2jb-ip" data-i18n="ipLabel">Local network IP address (optional)</label>
+              <select id="ns2jb-ip">
+                <option value="">Automatic</option>
+              </select>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn primary" id="btn-start-ns2jb" data-i18n="btnStartNs2jb">Start ns2jb</button>
+              <button class="btn danger" id="btn-stop-ns2jb" data-i18n="btnStopNs2jb" disabled>Stop ns2jb (Safe Cleanup)</button>
+            </div>
+
+            <div class="hint-box hidden" id="smilebasic-box">
+              <div class="hint-title" data-i18n="smileBasicTitle">Detected SmileBASIC command:</div>
+              <code id="smilebasic-cmd"></code>
+            </div>
+
+            <div class="mini-stdin hidden" id="ns2jb-stdin-row">
+              <input type="text" id="ns2jb-stdin-input" data-i18n-placeholder="ns2jbStdinPlaceholder" placeholder="Send input to ns2jb..." />
+              <button class="btn ghost small-btn" id="btn-ns2jb-stdin" data-i18n="btnSend">Send</button>
+            </div>
+          </div>
+
+          <div class="card step-card">
+            <div class="step-head">
+              <span class="step-badge coral">2</span>
+              <div>
+                <h3 data-i18n="step2Title">Select Host &amp; Game &amp; Install</h3>
+                <p class="muted small" data-i18n="step2Desc">Click a game card below or detect live from Switch 2.</p>
+              </div>
+              <span class="pill" id="pill-backend">Ready</span>
+            </div>
+
+            <div class="games-picker" id="launch-games-list"></div>
+
+            <div class="prompt-box hidden" id="backend-prompt-box">
+              <div class="prompt-title" id="backend-prompt-q"></div>
+              <div class="prompt-options" id="backend-prompt-options"></div>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn primary" id="btn-start-backend" data-i18n="btnInstallSelected">Install Selected Game</button>
+              <button class="btn ghost" id="btn-start-backend-live" data-i18n="btnDetectLive">Detect Live from Switch 2</button>
+              <button class="btn danger hidden" id="btn-stop-backend" data-i18n="btnCancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card ready-banner hidden" id="ready-banner">
+          <div class="ready-icon">✓</div>
+          <div>
+            <h3 data-i18n="readyTitle">READY! Everything is set on Switch 2</h3>
+            <p data-i18n-html="readyBody"></p>
+          </div>
+        </div>
+
+        <div class="card log-card">
+          <div class="log-head">
+            <div class="log-tabs">
+              <button class="log-tab active" data-log="ns2jb" data-i18n="logNs2jbTab">ns2jb Log</button>
+              <button class="log-tab" data-log="backend" data-i18n="logBackendTab">Backend Log</button>
+            </div>
+            <button class="btn ghost small-btn" id="btn-clear-log" data-i18n="btnClearLog">Clear view</button>
+          </div>
+          <pre class="log-view" id="launch-log-view"></pre>
+        </div>
+      </section>
+
+      <!-- TAB 2: PREPARE -->
+      <section class="tab-panel" id="tab-prepare">
+        <header class="page-header">
+          <div>
+            <h2 data-i18n="prepareTitle">Prepare a New Game from .nup</h2>
+            <p class="muted" data-i18n-html="prepareDesc"></p>
+          </div>
+        </header>
+
+        <div class="card">
+          <div class="form-grid">
+            <div class="form-row full">
+              <label for="prep-nup" data-i18n="prepNupLabel">Game .nup package</label>
+              <div class="input-with-btn">
+                <input type="text" id="prep-nup" data-i18n-placeholder="prepNupPlaceholder" />
+                <button class="btn ghost" id="btn-browse-nup" data-i18n="btnBrowse">Browse...</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="prep-name" data-i18n="prepNameLabel">Game folder name (no spaces)</label>
+              <input type="text" id="prep-name" data-i18n-placeholder="prepNamePlaceholder" />
+            </div>
+
+            <div class="form-row">
+              <label for="prep-host" data-i18n="prepHostLabel">Host Game (Switch 2 container title)</label>
+              <select id="prep-host"></select>
+            </div>
+
+            <div class="form-row">
+              <label class="checkbox-row">
+                <input type="checkbox" id="prep-autopatch" checked />
+                <span data-i18n-html="prepAutoPatch"></span>
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label class="checkbox-row">
+                <input type="checkbox" id="prep-copy-sd" checked />
+                <span><span data-i18n="prepCopySd">Copy directly to microSD</span> (<span id="prep-sd-label">D:</span>) <span data-i18n="prepCopySdSuffix">when done</span></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn primary" id="btn-start-prepare" data-i18n="btnStartPrepare">Prepare Game</button>
+            <button class="btn danger hidden" id="btn-stop-prepare" data-i18n="btnCancel">Cancel</button>
+          </div>
+        </div>
+
+        <div class="card log-card">
+          <div class="log-head">
+            <span class="log-title" data-i18n="prepProgressTitle">Preparation progress</span>
+            <span class="pill" id="pill-prepare">Idle</span>
+          </div>
+          <pre class="log-view" id="prepare-log-view"></pre>
+        </div>
+      </section>
+
+      <!-- TAB 3: MICROSD & HOSTS -->
+      <section class="tab-panel" id="tab-sd">
+        <header class="page-header">
+          <div>
+            <h2 data-i18n="sdTitle">MicroSD &amp; Host Titles Manager</h2>
+            <p class="muted" data-i18n="sdDesc"></p>
+          </div>
+          <div class="btn-group">
+            <select id="sd-drive-select" class="compact-select"></select>
+            <button class="btn primary" id="btn-rescan-sd" data-i18n="btnScanSd">Scan MicroSD</button>
+          </div>
+        </header>
+
+        <div class="card">
+          <div class="card-title-row">
+            <h3 data-i18n="sdGamesHeading">Games on MicroSD</h3>
+            <span class="muted small" id="sd-status-text"></span>
+          </div>
+          <div id="sd-hosts-container" class="sd-hosts-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row">
+            <h3 data-i18n="hostsHeading">Registered Host Titles (Signed Policies)</h3>
+            <span class="muted small" data-i18n="hostsSub"></span>
+          </div>
+          <div id="registered-hosts-list" class="hosts-chips"></div>
+
+          <div class="divider"></div>
+          <h4 class="sub-heading" data-i18n="addHostHeading">Register a New Host Game</h4>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="host-file" data-i18n="hostFileLabel">Host game .nup or main.npdm</label>
+              <div class="input-with-btn">
+                <input type="text" id="host-file" data-i18n-placeholder="hostFilePlaceholder" />
+                <button class="btn ghost" id="btn-browse-host" data-i18n="btnBrowse">Browse...</button>
+              </div>
+            </div>
+            <div class="form-row">
+              <label for="host-name" data-i18n="hostNameLabel">Friendly host name</label>
+              <input type="text" id="host-name" data-i18n-placeholder="hostNamePlaceholder" />
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn primary" id="btn-add-host" data-i18n="btnAddHost">Register New Host</button>
+            <span class="muted small" id="add-host-feedback"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: SETUP GUIDE -->
+      <section class="tab-panel" id="tab-setup">
+        <header class="page-header">
+          <div>
+            <h2 data-i18n="setupTitle">First-Time Setup Guide</h2>
+            <p class="muted" data-i18n="setupDesc">Starting from scratch (or only have ns2jb)? Check your environment and follow these simple steps.</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn primary" id="btn-setup-check" data-i18n="btnCheckEnv">Check Environment</button>
+            <button class="btn ghost" id="btn-setup-clone" data-i18n="btnCloneNs2jb">1-Click Download ns2jb</button>
+            <button class="btn ghost" id="btn-setup-nup" data-i18n="btnInstallNup">1-Click Install nup</button>
+          </div>
+        </header>
+
+        <div class="card">
+          <div class="card-title-row">
+            <h3 data-i18n="setupChecklistTitle">System Status Checklist</h3>
+            <span class="muted small" id="setup-action-status"></span>
+          </div>
+          <div class="env-grid" id="setup-env-grid">
+            <div class="empty-note" data-i18n="setupClickCheck">Click <strong>Check Environment</strong> to verify Node.js, ns2jb, bundled backend engine, and Python/nup.</div>
+          </div>
+        </div>
+
+        <div class="warn-box" data-i18n-html="betaNoticeBox"></div>
+
+        <div class="card">
+          <h3 data-i18n="setupStepsTitle">Step-by-Step Instructions</h3>
+          <ol class="guide-steps" id="setup-steps-list">
+            <li data-i18n-html="guideStep1"></li>
+            <li data-i18n-html="guideStep2"></li>
+            <li data-i18n-html="guideStep3"></li>
+            <li data-i18n-html="guideStep4"></li>
+            <li data-i18n-html="guideStep5"></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- TAB 5: SETTINGS -->
+      <section class="tab-panel" id="tab-settings">
+        <header class="page-header">
+          <div>
+            <h2 data-i18n="settingsTitle">Settings</h2>
+            <p class="muted" data-i18n="settingsDesc">Configure your WSL distribution and paths (saved locally in config.local.json).</p>
+          </div>
+        </header>
+
+        <div class="card">
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="cfg-distro" data-i18n="cfgDistroLabel">WSL Distribution (blank = default)</label>
+              <input type="text" id="cfg-distro" placeholder="Ubuntu" />
+            </div>
+            <div class="form-row">
+              <label for="cfg-ns2jb" data-i18n="cfgNs2jbLabel">ns2jb folder in WSL</label>
+              <input type="text" id="cfg-ns2jb" placeholder="~/ns2jb" />
+            </div>
+            <div class="form-row">
+              <label for="cfg-civ7" data-i18n="cfgCiv7Label">Civilization VII (CivSwitchFS) folder in WSL [UNTESTED]</label>
+              <input type="text" id="cfg-civ7" placeholder="~/civ7-fs" />
+            </div>
+            <div class="form-row">
+              <label for="cfg-civ7-cmd" data-i18n="cfgCiv7CmdLabel">Civ VII RPC command [UNTESTED]</label>
+              <input type="text" id="cfg-civ7-cmd" placeholder="node run.cjs --rpc" />
+            </div>
+            <div class="form-row">
+              <label for="cfg-backend" data-i18n="cfgBackendLabel">Backend folder in WSL (blank = bundled engine)</label>
+              <input type="text" id="cfg-backend" placeholder="(bundled engine)" />
+            </div>
+            <div class="form-row">
+              <label for="cfg-nup" data-i18n="cfgNupLabel">nup Python venv in WSL (blank = auto)</label>
+              <input type="text" id="cfg-nup" placeholder="~/.ns2-game-loader/nup-venv" />
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn primary" id="btn-save-config" data-i18n="btnSaveConfig">Save Settings</button>
+            <button class="btn ghost" id="btn-test-wsl" data-i18n="btnTestWsl">Test WSL Connection</button>
+          </div>
+
+          <div class="wsl-test-box hidden" id="wsl-test-result"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+  <script src="/i18n.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

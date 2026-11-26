@@ -1,0 +1,29 @@
+# Local runtime state, caches, and user-specific paths
+cache/
+config.local.json
+*.log
+*.tmp
+
+# Bundled engine runtime logs, session state, and user host policies
+engine/backend/logs/*
+!engine/backend/logs/.gitkeep
+engine/backend/state/*
+!engine/backend/state/.gitkeep
+engine/host-policies/*
+!engine/host-policies/.gitkeep
+
+# Never commit console keys, firmware, or Nintendo signed files
+*.npdm
+*.nsp
+*.nro
+*.nso
+*.nup
+*.bin
+*.ips
+*.ips32
+
+# OS / editor artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+node_modules/
