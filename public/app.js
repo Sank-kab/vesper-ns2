@@ -574,7 +574,7 @@ function renderEnvChecklist(r) {
     {title: 'WSL', sub: r.distro, cls: 'ok', tag: 'OK'},
     {title: 'Node.js (WSL)', sub: r.node, cls: r.nodeOk ? 'ok' : 'err', tag: r.nodeOk ? 'OK' : '22+ req'},
     {title: 'ns2jb (SmileBASIC)', sub: r.ns2jb ? 'run.cjs found' : 'Not installed', cls: r.ns2jb ? 'ok' : 'err', tag: r.ns2jb ? 'OK' : 'Missing'},
-    {title: 'Civ VII (Untested)', sub: r.civ7 ? 'Folder found' : 'Optional / Untested', cls: r.civ7 ? 'ok' : 'warn', tag: r.civ7 ? 'Found' : 'Optional'},
+    {title: 'Civ VII (Untested)', sub: r.civ7 ? 'CivSwitchFS found' : 'Optional / Untested', cls: r.civ7 ? 'ok' : 'warn', tag: r.civ7 ? 'Found' : 'Optional'},
     {title: 'Backend Engine', sub: r.bundledBackend ? 'Bundled (ready)' : 'Custom path', cls: r.backend ? 'ok' : 'err', tag: r.backend ? 'OK' : 'Missing'},
     {title: 'Python + nup', sub: r.nup ? r.python : 'Optional (.nup only)', cls: r.nup ? 'ok' : 'warn', tag: r.nup ? 'OK' : 'Optional'}
   ];
@@ -618,6 +618,23 @@ $('btn-setup-clone').addEventListener('click', async () => {
     showToast(e.message, true);
   } finally {
     $('btn-setup-clone').disabled = false;
+  }
+});
+
+$('btn-setup-clone-civ7').addEventListener('click', async () => {
+  try {
+    $('btn-setup-clone-civ7').disabled = true;
+    $('civ7-setup-status').textContent = t('toastCloneCiv7Running');
+    showToast(t('toastCloneCiv7Running'));
+    const res = await api('/api/setup/clone-civ7', {method: 'POST', body: JSON.stringify(readConfigForm())});
+    if (res.test) renderEnvChecklist(res.test);
+    $('civ7-setup-status').textContent = t('toastCloneCiv7Done');
+    showToast(t('toastCloneCiv7Done'));
+  } catch (e) {
+    $('civ7-setup-status').textContent = '';
+    showToast(e.message, true);
+  } finally {
+    $('btn-setup-clone-civ7').disabled = false;
   }
 });
 

@@ -105,15 +105,26 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === '/api/setup/clone-ns2jb' && req.method === 'POST') {
       const body = await readBody(req);
-      const cfg = body && body.ns2jbDir ? {...loadConfig(), ...body} : loadConfig();
+      const hasBody = body && Object.keys(body).length > 0;
+      const cfg = hasBody ? {...loadConfig(), ...body} : loadConfig();
       const output = await bridge.cloneNs2jb(cfg);
+      const test = await bridge.testConnection(cfg);
+      return sendJson(res, 200, {ok: true, output, test});
+    }
+
+    if (pathname === '/api/setup/clone-civ7' && req.method === 'POST') {
+      const body = await readBody(req);
+      const hasBody = body && Object.keys(body).length > 0;
+      const cfg = hasBody ? {...loadConfig(), ...body} : loadConfig();
+      const output = await bridge.cloneCiv7(cfg);
       const test = await bridge.testConnection(cfg);
       return sendJson(res, 200, {ok: true, output, test});
     }
 
     if (pathname === '/api/setup/install-nup' && req.method === 'POST') {
       const body = await readBody(req);
-      const cfg = body && body.ns2jbDir ? {...loadConfig(), ...body} : loadConfig();
+      const hasBody = body && Object.keys(body).length > 0;
+      const cfg = hasBody ? {...loadConfig(), ...body} : loadConfig();
       const output = await bridge.installNup(cfg);
       const test = await bridge.testConnection(cfg);
       return sendJson(res, 200, {ok: true, output, test});

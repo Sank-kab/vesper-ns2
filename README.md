@@ -42,8 +42,8 @@ Transparency matters in beta software. Here is what has been verified on real Sw
 - **Possible consequences & limitations:** Because `TemporaryStorage` is **not actually mounted**, any later runtime code that tries to create, read, or write files under `tmp:/` (such as temporary caches, replays, screenshots, or specific transitions) may fail with `ResultNotMounted` (`2002-6002`), misbehave, or crash later. You can disable this auto-patch at any time in the UI or via `--no-auto-patch`.
 
 ### 3. Civilization VII (`CivSwitchFS`) Vector — Experimental / Untested
-- Alongside **SmileBASIC 4 (`ns2jb`)**, the UI includes an experimental vector option for **Civilization VII (`CivSwitchFS`)**.
-- **This vector has NOT been tested by the author.** It is intended only for advanced testers using a `CivSwitchFS` fork that exposes the same verified FS 4/4 RPC session layout (`result.json`, `connection.json`, `switch2/fs-execution-current.json`). Its WSL directory and command can be configured in **Settings**.
+- Alongside **SmileBASIC 4 (`ns2jb`)**, the UI includes an experimental vector option and a **1-Click Install CivSwitchFS** section in **Setup Guide** (clones `ItsNerisma/CivSwitchFS` into `~/civ7-fs` and runs `npm install`).
+- **This vector has NOT been tested by the author.** Note that upstream `ItsNerisma/CivSwitchFS` is semi-untethered (PC RPC was removed; it installs via `npm run persist -- <console-ip>` and documents save/brick risks in its own `BRICK_RISKS.md`). Automatic Step 2 detection in Vesper requires a `CivSwitchFS` fork exposing an `ns2jb`-compatible FS 4/4 RPC session (`result.json`, `connection.json`, `switch2/fs-execution-current.json`). Its WSL directory and command can be configured in **Settings**.
 
 ---
 
@@ -149,6 +149,7 @@ Yes — you can register any legally owned target title's `main.npdm` in **Micro
 
 - Huge thanks to **[SebaaMG](https://github.com/SebaaMG/ns2jb-modloader)** and the **`ns2jb-modloader`** project — the bundled multi-profile backend in `engine/` is built directly on top of `ns2jb-modloader` (GPL-2.0-only).
 - Thanks to **[Kurumuz](https://gitlab.com/kurumuz/ns2jb)** and contributors for **`ns2jb`**.
+- Thanks to **[ItsNerisma](https://github.com/ItsNerisma/CivSwitchFS)** and **[Gezine](https://github.com/Gezine)** for **`CivSwitchFS`**.
 - Thanks to the Switch 2 research & homebrew community (`libounce`, `libnx`, `zstd`, and all third-party licenses preserved under `engine/licenses/`).
 
 ## License
