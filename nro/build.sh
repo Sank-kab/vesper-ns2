@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-IMAGE="${OUNCE_DEVKIT_IMAGE:-ghcr.io/ouncebrew/ounce-devkit:latest}"
+IMAGE="${OUNCE_DEVKIT_IMAGE:-ounce-devkit:latest}"
 
 echo "Building vesper.nro using Docker image: $IMAGE"
 docker run --rm -v "$SCRIPT_DIR:/src" -w /src "$IMAGE" make "$@"
