@@ -177,7 +177,7 @@ function packExefsNsp(exefsDir,hostPolicyFile,outputFile){
 
 function parseNupPackages(nupFile){
  let info;
- try{info=execFileSync(NUP_BIN,['info',nupFile],{encoding:'utf8'});}
+ try{info=execFileSync(NUP_BIN,['info',nupFile],{encoding:'latin1',maxBuffer:32*1024*1024});}
  catch(err){
   if(err&&err.code==='ENOENT')fail('nup tool not found in WSL. Click "Install nup" in the Setup Guide tab, or run: python3 -m venv ~/.ns2-game-loader/nup-venv && ~/.ns2-game-loader/nup-venv/bin/pip install nup');
   throw err;
@@ -194,22 +194,37 @@ function parseNupPackages(nupFile){
 function extractBaseOnlyRomfs(nupFile,baseIdx,updateIdx,destDir){
  const py=`
 import sys, pathlib
-from nup.reader import NupReader
+from nup.read import NupReader
+from nup.access import iter_children
 nup_file, base_idx, upd_idx, dest = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), pathlib.Path(sys.argv[4])
 dest.mkdir(parents=True, exist_ok=True)
+def walk_romfs(r, dir_idx, prefix=""):
+    out = {}
+    if dir_idx == 0xFFFFFFFF:
+        return out
+    for node in iter_children(r, dir_idx):
+        name = node.name.decode("utf-8")
+        rel = f"{prefix}/{name}" if prefix else name
+        if node.is_dir:
+            out.update(walk_romfs(r, node.index, rel))
+        else:
+            out[rel] = node.index
+    return out
 with NupReader(nup_file) as r:
-    base_pkg = r.packages[base_idx]
-    upd_pkg = r.packages[upd_idx]
-    upd_paths = {n.path for n in upd_pkg.files if n.path.startswith('romfs/')}
-    base_only = [n for n in base_pkg.files if n.path.startswith('romfs/') and n.path not in upd_paths]
+    upd_files = walk_romfs(r, r.packages[upd_idx].romfs_dir)
+    base_files = walk_romfs(r, r.packages[base_idx].romfs_dir)
+    base_only = [(rel, fi) for rel, fi in base_files.items() if rel not in upd_files]
     print(f'Base-only files to merge: {len(base_only)}')
-    for n in base_only:
-        rel = n.path[len('romfs/'):]
+    for rel, fi in base_only:
         out = dest / rel
         out.parent.mkdir(parents=True, exist_ok=True)
+        _, off, size, _, _ = r.files[fi]
         with out.open('wb') as f:
-            for chunk in r.iter_file_data(n):
-                f.write(chunk)
+            pos = 0
+            while pos < size:
+                chunk = min(4 * 1024 * 1024, size - pos)
+                f.write(r._mm[off + pos:off + pos + chunk])
+                pos += chunk
 `;
  execFileSync(NUP_PY,['-c',py,nupFile,String(baseIdx),String(updateIdx),destDir],{stdio:'inherit'});
 }
@@ -319,7 +334,9 @@ async function main(argv=process.argv.slice(2)){
  const codePkg=updatePkg||basePkg;
  console.log('NUP packages found: '+pkgs.map(p=>'['+p.index+'] '+p.kind+' ('+p.titleId+')').join(', '));
 
- const tmpDir=fs.mkdtempSync(path.join(os.tmpdir(),'ns2-prep-'));
+ const tmpBase=path.join(os.homedir(),'.ns2-game-loader','tmp');
+ fs.mkdirSync(tmpBase,{recursive:true});
+ const tmpDir=fs.mkdtempSync(path.join(tmpBase,'ns2-prep-'));
  try{
   // 1) Extract ExeFS
   const exefsTmp=path.join(tmpDir,'exefs-extract');

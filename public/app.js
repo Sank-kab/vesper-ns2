@@ -489,7 +489,7 @@ $('btn-browse-nup').addEventListener('click', async () => {
     if (res.path) {
       $('prep-nup').value = res.path;
       if (!$('prep-name').value.trim()) {
-        const stem = res.path.split(/[\\/]/).pop().replace(/\.nup$/i, '').toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+        const stem = res.path.split(/[\\/]/).pop().replace(/\.nup$/i, '').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
         $('prep-name').value = stem;
       }
     }
