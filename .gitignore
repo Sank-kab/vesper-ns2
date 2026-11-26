@@ -3,6 +3,8 @@ cache/
 config.local.json
 *.log
 *.tmp
+nro/build/
+nro/source/runtime_templates.h
 
 # Bundled engine runtime logs, session state, and user host policies
 engine/backend/logs/*
